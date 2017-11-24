@@ -1,30 +1,40 @@
-class CocktailsController < ApplicationController
-  def index
-    @cocktails = Cocktail.all
-  end
-
-  def show
-    @cocktail = Cocktail.find(params[:id])
-    @doses = @cocktail.doses
-  end
+class DosesController < ApplicationController
+  before_action :set_cocktail, only: [:new, :create]
 
   def new
-    @cocktail = Cocktail.new
+    @dose = Dose.new
   end
 
   def create
-    @cocktail = Cocktail.new(cocktail_params)
+    @dose = Dose.new(dose_params)
+    # <Dose id: nil, cocktail_id: nil, ingredient_id: 6, description: "1/4">
 
-    if @cocktail.save
+    # @cocktail.doses << @dose # SAVE
+
+    @dose.cocktail = @cocktail
+
+    if @dose.save
+      # <Dose id: 1, cocktail_id: 1, ingredient_id: 6, description: "1/4">
       redirect_to cocktail_path(@cocktail)
     else
       render :new
     end
   end
 
+  def destroy
+    dose = Dose.find(params[:id])
+    dose.destroy
+
+    redirect_to cocktail_path(dose.cocktail)
+  end
+
   private
 
-  def cocktail_params
-    params.require(:cocktail).permit(:name)
+  def dose_params
+    params.require(:dose).permit(:ingredient_id, :description)
+  end
+
+  def set_cocktail
+    @cocktail = Cocktail.find(params[:cocktail_id])
   end
 end
